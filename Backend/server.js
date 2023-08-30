@@ -3,8 +3,18 @@ const app = express();
 const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
+const passport = require('passport');
+const bcrypt = require('bcrypt');
+const session = require('express-session');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(session({ secret: 'DKER9g3HJU', resave: true, saveUninitialized: true }));
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(User.createStrategy());
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 app.use(cors());
 dotenv.config();
 
@@ -71,6 +81,8 @@ app.patch("/updatewallet/:id", async (req, res) => {
       .json({ error: "An error occurred while updating the wallet" });
   }
 });
+
+
 
 mongoose
   .connect(MongoURL, { useNewUrlParser: true, useUnifiedTopology: true })
