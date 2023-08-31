@@ -18,3 +18,6 @@ Node.js - Backend JavaScript runtime.
 Express - Web application framework for Node.js.
 React - JavaScript library for building user interfaces.
 MongoDB - NoSQL database.
+## Note
+User Authentication has been implemented.
+Access the dashboard on http://localhost:3000/register after running both servers.

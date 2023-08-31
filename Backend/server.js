@@ -81,7 +81,7 @@ app.get("/getAllUsersInfo", async (req, res) => {
   await User.find({})
     .then((users) => {
       res.send(users)
-      console.log(users);
+      console.log(users)
     })
     .catch((error) => {
       console.error("Error retrieving users:", error);
