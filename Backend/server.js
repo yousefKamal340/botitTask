@@ -80,7 +80,8 @@ app.post("/createNewUser", async (req, res) => {
 app.get("/getAllUsersInfo", async (req, res) => {
   await User.find({})
     .then((users) => {
-      console.log("All users:", users);
+      res.send(users)
+      console.log(users);
     })
     .catch((error) => {
       console.error("Error retrieving users:", error);
@@ -89,7 +90,11 @@ app.get("/getAllUsersInfo", async (req, res) => {
 
 app.patch("/updatewallet/:id", async (req, res) => {
   const userId = req.params.id;
-  const updateValue = req.body.value; // Value to be added or subtracted
+  const updateValue = parseInt(Object.keys(req.body)[0]); // Value to be added or subtracted
+
+  console.log("-----------------")
+  console.log(Object.keys(req.body)[0])
+  console.log("-----------------")
 
   try {
     const user = await User.findById(userId);
@@ -115,7 +120,7 @@ app.patch("/updatewallet/:id", async (req, res) => {
     console.error("Error updating wallet:", error);
     res
       .status(500)
-      .json({ error: "An error occurred while updating the wallet" });
+      .json({ error: "An error occurred while updating the wallet", error });
   }
 });
 
