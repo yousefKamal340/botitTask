@@ -3,7 +3,7 @@ import { Button, Form, Input } from "antd";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const Landing = () => {
+const Login = () => {
   const nav = useNavigate();
   const gradientStyle = {
     background: "linear-gradient(135deg, #292929, #563d7c)",
@@ -15,20 +15,24 @@ const Landing = () => {
     flexDirection: "column",
   };
 
+  const config = {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  };
+
   const onFinish = async (values) => {
     try {
       const response = await axios.post(
-        "http://localhost:8000/register",
-        values
+        "http://localhost:8000/login",
+        values,
+        config
       );
-      // Change the URL if needed
-      console.log("Registration successful:", response.data);
-      nav("/login");
-      window.location.reload()
-      // Optionally, you can show a success message or navigate to a new page
+      console.log("Login successful", response);
+      nav("/usersWallet");
+      window.location.reload();
     } catch (error) {
-      console.error("Registration failed:", error);
-      // Optionally, you can show an error message to the user
+      console.error("Login failed:", error);
     }
   };
   const onFinishFailed = (errorInfo) => {
@@ -55,7 +59,7 @@ const Landing = () => {
           transform: "translateY(-15vh)",
         }}
       >
-        Please Register to Continue
+        Please Login to Continue
       </p>
       <Form
         name="basic"
@@ -117,4 +121,4 @@ const Landing = () => {
   );
 };
 
-export default Landing;
+export default Login;
