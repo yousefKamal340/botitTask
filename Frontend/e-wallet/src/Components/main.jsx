@@ -1,19 +1,19 @@
-import React from "react";
-import { useEffect } from "react";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Avatar, Button, List } from "antd";
-import { Col, InputNumber, Row, Slider, Space } from "antd";
+import { Col, Slider } from "antd";
 
 const Main = () => {
-  const [inputValue, setInputValue] = useState(1);
-  const onChange = (newValue) => {
-    setInputValue(newValue);
+  const [inputValues, setInputValues] = useState([]);
+  const onChange = (index, newValue) => {
+    const updatedInputValues = [...inputValues];
+    updatedInputValues[index] = newValue;
+    setInputValues(updatedInputValues);
   };
+
   const [data, setData] = useState([]);
   useEffect(() => {
     fetchData();
-    console.log(data, "---> data");
   }, []);
 
   const fetchData = async () => {
@@ -23,24 +23,26 @@ const Main = () => {
         id: user._id,
         Name: user.Name,
         WalletHistory: user.WalletHistory,
-        Wallet: user.Wallet
+        Wallet: user.Wallet,
       }));
       setData(sanitizedData);
+      setInputValues(new Array(sanitizedData.length).fill(0));
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
 
   const changeWallet = async (id, value) => {
-    console.log(inputValue, "inputValue")
     try {
       const response = await axios.patch(
         `http://localhost:8000/updatewallet/${id}`,
-        inputValue
+        value
       );
       console.log(response);
       window.location.reload();
-    } catch (error) {}
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const gradientStyle = {
@@ -52,6 +54,7 @@ const Main = () => {
     justifyContent: "center",
     flexDirection: "column",
   };
+  
   return (
     <div style={gradientStyle}>
       <h2
@@ -91,14 +94,10 @@ const Main = () => {
                       style={{ backgroundColor: "#000000" }}
                       min={0}
                       max={100}
-                      onChange={onChange}
-                      value={typeof inputValue === "number" ? inputValue : 0}
+                      onChange={(newValue) => onChange(index, newValue)}
+                      value={typeof inputValues[index] === "number" ? inputValues[index] : 0}
                     />
-                    <Button
-                      onClick={() =>
-                        changeWallet(item.id)
-                      }
-                    >
+                    <Button onClick={() => changeWallet(item.id, inputValues[index])}>
                       Change Wallet Value
                     </Button>
                   </Col>
@@ -111,4 +110,5 @@ const Main = () => {
     </div>
   );
 };
+
 export default Main;
