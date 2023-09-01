@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Avatar, Button, List } from "antd";
-import { Col, Slider } from "antd";
+import { Avatar, Button, Card, Col, Row, Slider, Table, Tag } from "antd";
+import {
+  EyeOutlined,
+  WalletOutlined,
+  HistoryOutlined,
+} from "@ant-design/icons";
 
 const Main = () => {
   const [inputValues, setInputValues] = useState([]);
@@ -12,6 +16,9 @@ const Main = () => {
   };
 
   const [data, setData] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [showWalletHistory, setShowWalletHistory] = useState(false);
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -45,6 +52,62 @@ const Main = () => {
     }
   };
 
+  const columns = [
+    {
+      title: "Avatar",
+      dataIndex: "avatar",
+      key: "avatar",
+      render: (avatar, record, index) => (
+        <Avatar
+          src={`https://xsgames.co/randomusers/avatar.php?g=pixel&key=${index}`}
+        />
+      ),
+    },
+    {
+      title: "Name",
+      dataIndex: "Name",
+      key: "Name",
+    },
+    {
+      title: "Wallet",
+      dataIndex: "Wallet",
+      key: "Wallet",
+      render: (Wallet) => (
+        <Tag color={Wallet >= 0 ? "green" : "red"}>
+          {Wallet >= 0 ? `$${Wallet}` : `-$${Math.abs(Wallet)}`}
+        </Tag>
+      ),
+    },
+    {
+      title: "Actions",
+      dataIndex: "actions",
+      key: "actions",
+      render: (_, record) => (
+        <div>
+          <Button
+            icon={<EyeOutlined />}
+            onClick={() => setSelectedUser(data[record.key])}
+          >
+            View Card
+          </Button>
+          <Button
+            icon={<WalletOutlined />}
+            onClick={() => setShowWalletHistory(!showWalletHistory)}
+          >
+            View Wallet History
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
+  const dataSource = data.map((item, index) => ({
+    key: index,
+    avatar: item.id,
+    Name: item.Name,
+    Wallet: item.Wallet,
+  }));
+
   const gradientStyle = {
     background: "linear-gradient(135deg, #292929, #563d7c)",
     minHeight: "100vh",
@@ -54,59 +117,78 @@ const Main = () => {
     justifyContent: "center",
     flexDirection: "column",
   };
-  
+
   return (
     <div style={gradientStyle}>
-      <h2
-        style={{
-          color: "#FFFFFF",
-          fontFamily: "fantasy",
-          fontSize: "40px",
-          fontStyle: "italic",
-          transform: "translateY(-15vh)",
-        }}
-      >
-        User List
-      </h2>
-      <List
-        style={{ minWidth: "100%" }}
-        dataSource={data}
-        renderItem={(item, index) => (
-          <List.Item>
-            <List.Item.Meta
-              avatar={
-                <Avatar
-                  src={`https://xsgames.co/randomusers/avatar.php?g=pixel&key=${index}`}
-                />
+      <div style={{ padding: "20px" }}>
+        <h2 style={{ textAlign: "center", marginBottom: "20px", color: "white" }}>User List</h2>
+        <Table
+          columns={columns}
+          dataSource={dataSource}
+          style={{ backgroundColor: "white" }}
+          bordered
+        />
+        {selectedUser && (
+          <Card
+            style={{
+              marginTop: "20px",
+              padding: "20px",
+              textAlign: "center",
+              backgroundColor: "gray"
+            }}
+          >
+            <Avatar
+              size={100}
+              src={`https://xsgames.co/randomusers/avatar.php?g=pixel&key=${data.indexOf(
+                selectedUser
+              )}`}
+            />
+            <h2>{selectedUser.Name}</h2>
+            <p>
+              Wallet:{" "}
+              <Tag color={selectedUser.Wallet >= 0 ? "green" : "red"}>
+                {selectedUser.Wallet >= 0
+                  ? `$${selectedUser.Wallet}`
+                  : `-$${Math.abs(selectedUser.Wallet)}`}
+              </Tag>
+            </p>
+            {showWalletHistory && (
+              <div>
+                <h3>Wallet History</h3>
+                <ul>
+                  {selectedUser.WalletHistory.map((historyItem, index) => (
+                    <li key={index}>{historyItem}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <Slider
+              style={{ backgroundColor: "#000000" }}
+              min={0}
+              max={100}
+              onChange={(newValue) =>
+                onChange(data.indexOf(selectedUser), newValue)
               }
-              title={
-                <label style={{ color: "#FFFFFF" }}>
-                  {item.Name} {item.Wallet}
-                  <label style={{ color: "#FFFFFF" }}>
-                    <ul>
-                      {item.WalletHistory.map((user) => (
-                        <li key={user.id}>{user}</li>
-                      ))}
-                    </ul>
-                  </label>
-                  <Col span={12}>
-                    <Slider
-                      style={{ backgroundColor: "#000000" }}
-                      min={0}
-                      max={100}
-                      onChange={(newValue) => onChange(index, newValue)}
-                      value={typeof inputValues[index] === "number" ? inputValues[index] : 0}
-                    />
-                    <Button onClick={() => changeWallet(item.id, inputValues[index])}>
-                      Change Wallet Value
-                    </Button>
-                  </Col>
-                </label>
+              value={
+                typeof inputValues[data.indexOf(selectedUser)] === "number"
+                  ? inputValues[data.indexOf(selectedUser)]
+                  : 0
               }
             />
-          </List.Item>
+            <Button
+              style={{ marginTop: "10px" }}
+              onClick={() =>
+                changeWallet(
+                  selectedUser.id,
+                  inputValues[data.indexOf(selectedUser)]
+                )
+              }
+            >
+              Change Wallet Value
+            </Button>
+          </Card>
         )}
-      />
+      </div>
     </div>
   );
 };
